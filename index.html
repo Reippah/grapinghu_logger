@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>더 뉴 그라핑후 리그전 기록 템플릿 생성기</title>
+  <style>
+    :root{
+      --bg:#f3f5f8;
+      --card:#ffffff;
+      --text:#111827;
+      --sub:#6b7280;
+      --line:#e5e7eb;
+      --primary:#111827;
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --warn:#d97706;
+      --bad:#dc2626;
+      --radius:18px;
+      --shadow:0 10px 30px rgba(17,24,39,.08);
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+      background:linear-gradient(180deg,#edf2f7 0%, #f8fafc 100%);
+      color:var(--text);
+      padding:14px;
+      padding-bottom:calc(20px + env(safe-area-inset-bottom));
+      -webkit-font-smoothing:antialiased;
+    }
+    .app{max-width:820px;margin:0 auto;}
+    .hero{padding:8px 4px 14px;}
+    .hero h1{
+      margin:0 0 6px;
+      font-size:1.5rem;
+      line-height:1.25;
+      font-weight:800;
+      letter-spacing:-0.02em;
+    }
+    .hero p{
+      margin:0;
+      color:var(--sub);
+      line-height:1.45;
+      font-size:.95rem;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid rgba(229,231,235,.95);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .section-title{
+      margin:0 0 12px;
+      font-size:1rem;
+      font-weight:800;
+    }
+    .grid{display:grid;gap:10px;}
+    .grid-2{grid-template-columns:1fr;}
+    .field label{
+      display:block;
+      margin:0 0 6px;
+      font-size:.83rem;
+      font-weight:700;
+      color:#374151;
+    }
+    .input,.select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      font-size:16px;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+      appearance:none;
+    }
+    .input:focus,.select:focus,textarea:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+    .fixed-box{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#f9fafb;
+      min-height:52px;
+    }
+    .fixed-box strong{font-size:1rem;}
+    .fixed-box span{color:var(--sub);font-size:.85rem;font-weight:700;}
+    .hint{
+      margin-top:8px;
+      color:var(--sub);
+      font-size:.8rem;
+      line-height:1.4;
+    }
+    .time-wrap{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:8px;
+      align-items:end;
+    }
+    .time-divider{
+      align-self:center;
+      padding:0 2px 12px;
+      font-weight:800;
+      color:var(--sub);
+    }
+    .player-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fcfcfd;
+      margin-top:10px;
+    }
+    .player-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:54px;
+      border-radius:999px;
+      padding:7px 10px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-size:.82rem;
+      font-weight:800;
+    }
+    .calc-preview{
+      font-size:.83rem;
+      color:var(--sub);
+      font-weight:700;
+    }
+    .player-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .status-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 11px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:800;
+      border:1px solid transparent;
+    }
+    .pill.ok{background:#ecfdf5;color:#166534;border-color:#bbf7d0;}
+    .pill.bad{background:#fef2f2;color:#991b1b;border-color:#fecaca;}
+    .pill.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+    .pill.warn{background:#fff7ed;color:#9a3412;border-color:#fed7aa;}
+    .actions{
+      position:sticky;
+      bottom:10px;
+      z-index:20;
+      background:rgba(243,245,248,.82);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      padding:10px 0 2px;
+    }
+    .action-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr;
+      gap:8px;
+    }
+    button{
+      border:none;
+      border-radius:16px;
+      min-height:52px;
+      padding:12px 14px;
+      font-size:.96rem;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .04s ease;
+      -webkit-tap-highlight-color:transparent;
+    }
+    button:active{transform:scale(.985);}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 10px 20px rgba(17,24,39,.18);}
+    .btn-secondary{background:#fff;color:var(--text);border:1px solid var(--line);}
+    .btn-copy.done{background:var(--ok);color:#fff;border:none;}
+    textarea{
+      min-height:250px;
+      resize:vertical;
+      line-height:1.55;
+    }
+    .deploy{
+      line-height:1.55;
+      font-size:.92rem;
+    }
+    .deploy code{
+      background:#f3f4f6;
+      padding:2px 6px;
+      border-radius:8px;
+      font-size:.88em;
+    }
+    @media (min-width:640px){
+      body{padding:20px;}
+      .grid-2{grid-template-columns:1fr 1fr;}
+      .player-grid{grid-template-columns:1.2fr 1fr 1fr;}
+      .hero h1{font-size:1.75rem;}
+      .card{padding:18px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <h1>더 뉴 그라핑후 리그전 기록 템플릿 생성기</h1>
+      <p>시간, 합계 검증, 결과 복사 가능</p>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">기본 정보</h2>
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="round">회차</label>
+          <input class="input" type="number" id="round" inputmode="numeric" placeholder="예: 190" />
+        </div>
+        <div class="field">
+          <label>기준 점수</label>
+          <div class="fixed-box">
+            <strong>25000</strong>
+            <span>고정</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label style="display:block; margin:0 0 6px; font-size:.83rem; font-weight:700; color:#374151;">시간</label>
+        <div class="time-wrap">
+          <div class="field" style="margin:0;">
+            <label for="startTime" style="font-size:.78rem;">시작</label>
+            <input class="input" type="time" id="startTime" step="60" />
+          </div>
+          <div class="time-divider">~</div>
+          <div class="field" style="margin:0;">
+            <label for="endTime" style="font-size:.78rem;">종료</label>
+            <input class="input" type="time" id="endTime" step="60" />
+          </div>
+        </div>
+        
+      </div>
+
+      <div class="status-row">
+        <span class="pill info" id="baseInfo">기준점수 25000 고정</span>
+        <span class="pill warn" id="sumStatus">총합 확인 대기</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">등수별 입력</h2>
+
+      <div class="player-card">
+        <div class="player-head">
+          <span class="badge">1등</span>
+          <span class="calc-preview" id="preview1">자동 계산</span>
+        </div>
+        <div class="player-grid">
+          <div class="field">
+            <label for="name1">이름</label>
+            <input class="input" type="text" id="name1" placeholder="이름 입력" />
+          </div>
+          <div class="field">
+            <label for="score1">점수</label>
+            <input class="input" type="text" id="score1" inputmode="decimal" placeholder="예: 44800" />
+          </div>
+          <div class="field">
+            <label for="uma1">보너스</label>
+            <input class="input" type="number" id="uma1" inputmode="decimal" value="0" step="0.1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-head">
+          <span class="badge">2등</span>
+          <span class="calc-preview" id="preview2">자동 계산</span>
+        </div>
+        <div class="player-grid">
+          <div class="field">
+            <label for="name2">이름</label>
+            <input class="input" type="text" id="name2" placeholder="이름 입력" />
+          </div>
+          <div class="field">
+            <label for="score2">점수</label>
+            <input class="input" type="text" id="score2" inputmode="decimal" placeholder="예: 33000" />
+          </div>
+          <div class="field">
+            <label for="uma2">보너스</label>
+            <input class="input" type="number" id="uma2" inputmode="decimal" value="0" step="0.1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-head">
+          <span class="badge">3등</span>
+          <span class="calc-preview" id="preview3">자동 계산</span>
+        </div>
+        <div class="player-grid">
+          <div class="field">
+            <label for="name3">이름</label>
+            <input class="input" type="text" id="name3" placeholder="이름 입력" />
+          </div>
+          <div class="field">
+            <label for="score3">점수</label>
+            <input class="input" type="text" id="score3" inputmode="decimal" placeholder="예: 23900" />
+          </div>
+          <div class="field">
+            <label for="uma3">보너스</label>
+            <input class="input" type="number" id="uma3" inputmode="decimal" value="0" step="0.1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-head">
+          <span class="badge">4등</span>
+          <span class="calc-preview" id="preview4">자동 계산</span>
+        </div>
+        <div class="player-grid">
+          <div class="field">
+            <label for="name4">이름</label>
+            <input class="input" type="text" id="name4" placeholder="이름 입력" />
+          </div>
+          <div class="field">
+            <label for="score4">점수</label>
+            <input class="input" type="text" id="score4" inputmode="decimal" placeholder="예: -1700" />
+          </div>
+          <div class="field">
+            <label for="uma4">보너스</label>
+            <input class="input" type="number" id="uma4" inputmode="decimal" value="0" step="0.1" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="action-grid">
+        <button class="btn-primary" onclick="generateResult()">결과 생성</button>
+        <button class="btn-secondary btn-copy" id="copyBtn" onclick="copyResult()">복사</button>
+        <button class="btn-secondary" onclick="clearAll()">초기화</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">출력 결과</h2>
+      <textarea id="output" readonly placeholder="결과 생성 버튼을 누르면 여기 표시됩니다."></textarea>
+    </div>
+
+  </div>
+
+  <script>
+    const BASE_SCORE = 25000;
+    const TOTAL_SCORE = 100000;
+
+    function num(id){
+      const v = document.getElementById(id).value.trim();
+      if (!v) return NaN;
+
+      const cleaned = v.replace(/[^0-9\-]/g, "");
+      if (!cleaned || cleaned === "-") return NaN;
+
+      return Number(cleaned);
+    }
+
+    function str(id){
+      return document.getElementById(id).value.trim();
+    }
+
+    function formatDelta(value){
+      return (value >= 0 ? "+" : "") + value.toFixed(1);
+    }
+
+    function formatTime(timeStr){
+      return timeStr ? timeStr.replace(":", "") : "";
+    }
+
+    function calcLeaguePoint(score, uma){
+      return ((score - BASE_SCORE) / 1000) + uma;
+    }
+
+    function updatePreview(rank){
+      const score = num("score" + rank);
+      const uma = Number(document.getElementById("uma" + rank).value || 0);
+      const target = document.getElementById("preview" + rank);
+
+      if (Number.isNaN(score)) {
+        target.textContent = "자동 계산";
+        return;
+      }
+      target.textContent = formatDelta(calcLeaguePoint(score, uma));
+    }
+
+    function updateAllPreviews(){
+      [1,2,3,4].forEach(updatePreview);
+      updateScoreSumStatus();
+    }
+
+    function updateScoreSumStatus(){
+      const scores = [1,2,3,4].map(i => num("score" + i));
+      const status = document.getElementById("sumStatus");
+
+      if (scores.some(v => Number.isNaN(v))) {
+        status.className = "pill warn";
+        status.textContent = "총합 확인 대기";
+        return;
+      }
+
+      const sum = scores.reduce((a,b) => a+b, 0);
+      if (sum === TOTAL_SCORE) {
+        status.className = "pill ok";
+        status.textContent = `총합 ${sum}점 확인 완료`;
+      } else {
+        const diff = sum - TOTAL_SCORE;
+        const sign = diff > 0 ? "+" : "";
+        status.className = "pill bad";
+        status.textContent = `총합 ${sum}점 (${sign}${diff})`;
+      }
+    }
+
+    function generateTimeRange(){
+      const start = str("startTime");
+      const end = str("endTime");
+      if (!start || !end) return "";
+      return `${formatTime(start)}~${formatTime(end)}`;
+    }
+
+    function generateResult(){
+      const round = str("round");
+      const time = generateTimeRange();
+      const players = [1,2,3,4].map(rank => ({
+        rank,
+        name: str("name" + rank),
+        score: num("score" + rank),
+        uma: Number(document.getElementById("uma" + rank).value || 0)
+      }));
+
+      if (!round) {
+        alert("회차를 입력해주세요.");
+        return;
+      }
+      if (!time) {
+        alert("시작시간과 종료시간을 모두 선택해주세요.");
+        return;
+      }
+      for (const p of players) {
+        if (!p.name || Number.isNaN(p.score)) {
+          alert("이름과 점수를 모두 입력해주세요.");
+          return;
+        }
+      }
+
+      const scoreSum = players.reduce((acc, p) => acc + p.score, 0);
+      if (scoreSum !== TOTAL_SCORE) {
+        alert(`4인 점수 총합이 ${TOTAL_SCORE}점이 아닙니다. 현재 총합: ${scoreSum}점`);
+        return;
+      }
+
+      let result = "";
+      result += round + "\n";
+      result += time + "\n";
+      players.forEach(p => {
+        result += `${p.rank}. ${p.name} ${p.score} ${formatDelta(calcLeaguePoint(p.score, p.uma))}\n`;
+      });
+
+      document.getElementById("output").value = result.trim();
+      document.getElementById("output").scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    async function copyResult(){
+      const output = document.getElementById("output").value.trim();
+      const copyBtn = document.getElementById("copyBtn");
+      if (!output) {
+        alert("결과를 생성해주세요.");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(output);
+      } catch (e) {
+        const ta = document.getElementById("output");
+        ta.select();
+        ta.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+      }
+
+      copyBtn.textContent = "복사 완료";
+      copyBtn.classList.add("done");
+      setTimeout(() => {
+        copyBtn.textContent = "복사";
+        copyBtn.classList.remove("done");
+      }, 1400);
+    }
+
+    function clearAll(){
+      document.getElementById("round").value = "";
+      document.getElementById("startTime").value = "";
+      document.getElementById("endTime").value = "";
+      [1,2,3,4].forEach(rank => {
+        document.getElementById("name" + rank).value = "";
+        document.getElementById("score" + rank).value = "";
+        document.getElementById("uma" + rank).value = "0";
+      });
+      document.getElementById("output").value = "";
+      updateAllPreviews();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      ["score1","score2","score3","score4","uma1","uma2","uma3","uma4"].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener("input", updateAllPreviews);
+        el.addEventListener("change", updateAllPreviews);
+      });
+
+      updateAllPreviews();
+    });
+  </script>
+</body>
+</html>
