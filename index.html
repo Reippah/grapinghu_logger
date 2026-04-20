@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>더 뉴 그라핑후 리그전 기록 생성기</title>
+  <title>더 뉴 그라핑후 리그전 기록 템플릿 생성기</title>
   <style>
     :root{
       --bg:#f3f5f8;
@@ -224,7 +224,7 @@
 <body>
   <div class="app">
     <div class="hero">
-      <h1>더 뉴 그라핑후 리그전 기록 생성기</h1>
+      <h1>더 뉴 그라핑후 리그전 기록 템플릿 생성기</h1>
       <p>시간, 합계 검증, 결과 복사 가능</p>
     </div>
 
@@ -263,6 +263,7 @@
       <div class="status-row">
         <span class="pill info" id="baseInfo">기준점수 25000 고정</span>
         <span class="pill warn" id="sumStatus">총합 확인 대기</span>
+        <span class="pill warn" id="rankStatus">등수 순서 확인 대기</span>
       </div>
     </div>
 
@@ -281,7 +282,7 @@
           </div>
           <div class="field">
             <label for="score1">점수</label>
-            <input class="input" type="text" id="score1" inputmode="text" placeholder="예: 44800" />
+            <input class="input" type="text" id="score1" inputmode="decimal" placeholder="예: 44800" />
           </div>
           <div class="field">
             <label for="uma1">보너스</label>
@@ -302,7 +303,7 @@
           </div>
           <div class="field">
             <label for="score2">점수</label>
-            <input class="input" type="text" id="score2" inputmode="text" placeholder="예: 33000" />
+            <input class="input" type="text" id="score2" inputmode="decimal" placeholder="예: 33000" />
           </div>
           <div class="field">
             <label for="uma2">보너스</label>
@@ -323,7 +324,7 @@
           </div>
           <div class="field">
             <label for="score3">점수</label>
-            <input class="input" type="text" id="score3" inputmode="text" placeholder="예: 23900" />
+            <input class="input" type="text" id="score3" inputmode="decimal" placeholder="예: 23900" />
           </div>
           <div class="field">
             <label for="uma3">보너스</label>
@@ -344,7 +345,7 @@
           </div>
           <div class="field">
             <label for="score4">점수</label>
-            <input class="input" type="text" id="score4" inputmode="text" placeholder="예: -1700" />
+            <input class="input" type="text" id="score4" inputmode="decimal" placeholder="예: -1700" />
           </div>
           <div class="field">
             <label for="uma4">보너스</label>
@@ -414,6 +415,7 @@
     function updateAllPreviews(){
       [1,2,3,4].forEach(updatePreview);
       updateScoreSumStatus();
+      updateRankOrderStatus();
     }
 
     function updateScoreSumStatus(){
@@ -435,6 +437,27 @@
         const sign = diff > 0 ? "+" : "";
         status.className = "pill bad";
         status.textContent = `총합 ${sum}점 (${sign}${diff})`;
+      }
+    }
+
+    function updateRankOrderStatus(){
+      const scores = [1,2,3,4].map(i => num("score" + i));
+      const status = document.getElementById("rankStatus");
+
+      if (scores.some(v => Number.isNaN(v))) {
+        status.className = "pill warn";
+        status.textContent = "등수 순서 확인 대기";
+        return;
+      }
+
+      const isValid = scores[0] >= scores[1] && scores[1] >= scores[2] && scores[2] >= scores[3];
+
+      if (isValid) {
+        status.className = "pill ok";
+        status.textContent = "등수-점수 순서 정상";
+      } else {
+        status.className = "pill bad";
+        status.textContent = "등수와 점수 순서 불일치";
       }
     }
 
@@ -473,6 +496,13 @@
       const scoreSum = players.reduce((acc, p) => acc + p.score, 0);
       if (scoreSum !== TOTAL_SCORE) {
         alert(`4인 점수 총합이 ${TOTAL_SCORE}점이 아닙니다. 현재 총합: ${scoreSum}점`);
+        return;
+      }
+
+      const scores = players.map(p => p.score);
+      const isRankOrderValid = scores[0] >= scores[1] && scores[1] >= scores[2] && scores[2] >= scores[3];
+      if (!isRankOrderValid) {
+        alert("등수와 점수 순서가 맞지 않습니다. 1등 ≥ 2등 ≥ 3등 ≥ 4등 순서로 입력해주세요.");
         return;
       }
 
