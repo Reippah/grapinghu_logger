@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -284,10 +285,6 @@
             <label for="score1">점수</label>
             <input class="input" type="text" id="score1" placeholder="예: 44800" />
           </div>
-          <div class="field">
-            <label for="uma1">보너스</label>
-            <input class="input" type="number" id="uma1" inputmode="decimal" value="0" step="0.1" />
-          </div>
         </div>
       </div>
 
@@ -304,10 +301,6 @@
           <div class="field">
             <label for="score2">점수</label>
             <input class="input" type="text" id="score2" placeholder="예: 33000" />
-          </div>
-          <div class="field">
-            <label for="uma2">보너스</label>
-            <input class="input" type="number" id="uma2" inputmode="decimal" value="0" step="0.1" />
           </div>
         </div>
       </div>
@@ -326,10 +319,6 @@
             <label for="score3">점수</label>
             <input class="input" type="text" id="score3" placeholder="예: 23900" />
           </div>
-          <div class="field">
-            <label for="uma3">보너스</label>
-            <input class="input" type="number" id="uma3" inputmode="decimal" value="0" step="0.1" />
-          </div>
         </div>
       </div>
 
@@ -346,10 +335,6 @@
           <div class="field">
             <label for="score4">점수</label>
             <input class="input" type="text" id="score4" placeholder="예: -1700" />
-          </div>
-          <div class="field">
-            <label for="uma4">보너스</label>
-            <input class="input" type="number" id="uma4" inputmode="decimal" value="0" step="0.1" />
           </div>
         </div>
       </div>
@@ -396,20 +381,19 @@
       return timeStr ? timeStr.replace(":", "") : "";
     }
 
-    function calcLeaguePoint(score, uma){
-      return ((score - BASE_SCORE) / 1000) + uma;
+    function calcLeaguePoint(score){
+      return (score - BASE_SCORE) / 1000;
     }
 
     function updatePreview(rank){
       const score = num("score" + rank);
-      const uma = Number(document.getElementById("uma" + rank).value || 0);
       const target = document.getElementById("preview" + rank);
 
       if (Number.isNaN(score)) {
         target.textContent = "자동 계산";
         return;
       }
-      target.textContent = formatDelta(calcLeaguePoint(score, uma));
+      target.textContent = formatDelta(calcLeaguePoint(score));
     }
 
     function updateAllPreviews(){
@@ -474,8 +458,7 @@
       const players = [1,2,3,4].map(rank => ({
         rank,
         name: str("name" + rank),
-        score: num("score" + rank),
-        uma: Number(document.getElementById("uma" + rank).value || 0)
+        score: num("score" + rank)
       }));
 
       if (!round) {
@@ -510,7 +493,7 @@
       result += round + "\n";
       result += time + "\n";
       players.forEach(p => {
-        result += `${p.rank}. ${p.name} ${p.score} ${formatDelta(calcLeaguePoint(p.score, p.uma))}\n`;
+        result += `${p.rank}. ${p.name} ${p.score} ${formatDelta(calcLeaguePoint(p.score))}\n`;
       });
 
       document.getElementById("output").value = result.trim();
@@ -549,7 +532,6 @@
       [1,2,3,4].forEach(rank => {
         document.getElementById("name" + rank).value = "";
         document.getElementById("score" + rank).value = "";
-        document.getElementById("uma" + rank).value = "0";
       });
       document.getElementById("output").value = "";
       updateAllPreviews();
@@ -557,7 +539,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
-      ["score1","score2","score3","score4","uma1","uma2","uma3","uma4"].forEach(id => {
+      ["score1","score2","score3","score4"].forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener("input", updateAllPreviews);
         el.addEventListener("change", updateAllPreviews);
